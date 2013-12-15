@@ -1,0 +1,5 @@
+version = "0.1.0"
+description = "scrypt bindings for OCaml"
+requires = "ctypes.foreign"
+archive(byte) = "scrypt.cma"
+archive(native) = "scrypt.cmx"
