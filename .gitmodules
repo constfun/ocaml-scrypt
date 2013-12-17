@@ -1,0 +1,3 @@
+[submodule "libscrypt"]
+	path = libscrypt
+	url = git@github.com:pacemkr/libscrypt.git
