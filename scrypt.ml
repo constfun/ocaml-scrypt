@@ -1,14 +1,18 @@
-open Ctypes
-open Foreign
+external scryptenc_buf : string -> string -> int -> float -> float -> string = "scryptenc_buf_stub"
 
-let scryptenc_buf =
+
+let encrypt ?(maxmem=0) ?(maxmemfrac=0.125) ?(maxtime=5.0) data passwd =
+  scryptenc_buf data passwd maxmem maxmemfrac maxtime
+
+
+(*let scryptenc_buf =
   foreign "scryptenc_buf" (
-    ptr uint8_t @-> size_t (* inbuf, inbuflen *)
-    @-> ptr uint8_t (* outbuf *)
-    @-> ptr uint8_t @-> size_t (* passwd, passwdlen *)
-    @-> size_t (* maxmem *)
-    @-> double (* maxmemfrac *)
-    @-> double (* maxtime *)
+    ptr uint8_t @-> size_t [> inbuf, inbuflen <]
+    @-> ptr uint8_t [> outbuf <]
+    @-> ptr uint8_t @-> size_t [> passwd, passwdlen <]
+    @-> size_t [> maxmem <]
+    @-> double [> maxmemfrac <]
+    @-> double [> maxtime <]
     @-> returning int)
 
 let uint8_ptr_of_string s =
@@ -25,4 +29,4 @@ let encrypt ?(maxmem=0) ?(maxmemfrac=0.125) ?(maxtime=5.0) data passwd =
   let plen = Unsigned.Size_t.of_int (String.length passwd) in
   let mm = Unsigned.Size_t.of_int maxmem in
   let ret = scryptenc_buf inbuf_ptr inbuflen outbuf_ptr p_ptr plen mm maxmemfrac maxtime in
-  Printf.printf "%i\n" ret
+  Printf.printf "%i\n" ret*)

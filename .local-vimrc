@@ -1,0 +1,2 @@
+let s:camlstdlib = system("ocamlopt -config | grep standard_library: | sed 's/standard_library: //' | tr -d '\n'")
+let g:syntastic_c_include_dirs = [s:camlstdlib]

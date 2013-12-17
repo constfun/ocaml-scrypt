@@ -5,6 +5,7 @@
 *.cma
 *.cmi
 *.a
+*.so
 *.o
 *.cmx
 *.cmxs
