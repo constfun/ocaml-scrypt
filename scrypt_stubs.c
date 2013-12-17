@@ -18,13 +18,13 @@ struct ScryptArgs {
 	double  maxtime;
 };
 
-struct ScryptArgs scrypt_convert_args(value data, value key, value maxmem, value maxmemfrac, value maxtime) {
+struct ScryptArgs scrypt_convert_args(value data, value passwd, value maxmem, value maxmemfrac, value maxtime) {
 
 	struct ScryptArgs args = {
 		.inbuf = &Byte_u(data, 0),
 		.inbuflen = caml_string_length(data),
-		.passwd = &Byte_u(key, 0),
-		.passwdlen = caml_string_length(key),
+		.passwd = &Byte_u(passwd, 0),
+		.passwdlen = caml_string_length(passwd),
 		.maxmem = Unsigned_long_val(maxmem),
 		.maxmemfrac = Double_val(maxmemfrac),
 		.maxtime = Double_val(maxtime)
@@ -33,15 +33,15 @@ struct ScryptArgs scrypt_convert_args(value data, value key, value maxmem, value
 	return args;
 }
 
-CAMLprim value scryptenc_buf_stub(value data, value key, value maxmem, value maxmemfrac, value maxtime) {
+CAMLprim value scryptenc_buf_stub(value data, value passwd, value maxmem, value maxmemfrac, value maxtime) {
 
-	CAMLparam5(data, key, maxmem, maxmemfrac, maxtime);
+	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
 	CAMLlocal1(output);
 
 	uint8_t *outbuf = NULL;
 
 
-	struct ScryptArgs args = scrypt_convert_args(data, key, maxmem, maxmemfrac, maxtime);
+	struct ScryptArgs args = scrypt_convert_args(data, passwd, maxmem, maxmemfrac, maxtime);
 
 	/* From the horses mouth:
 	 *
@@ -63,16 +63,16 @@ CAMLprim value scryptenc_buf_stub(value data, value key, value maxmem, value max
 	CAMLreturn(output);
 }
 
-CAMLprim value scryptdec_buf_stub(value data, value key, value maxmem, value maxmemfrac, value maxtime) {
+CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value maxmemfrac, value maxtime) {
 
-	CAMLparam5(data, key, maxmem, maxmemfrac, maxtime);
+	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
 	CAMLlocal1(output);
 
 	uint8_t *output_start = NULL;
 	uint8_t *outbuf = NULL;
 	size_t outlen = 0;
 
-	struct ScryptArgs args = scrypt_convert_args(data, key, maxmem, maxmemfrac, maxtime);
+	struct ScryptArgs args = scrypt_convert_args(data, passwd, maxmem, maxmemfrac, maxtime);
 
 	/* From the horses mouth:
 	 *
