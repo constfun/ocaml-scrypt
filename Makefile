@@ -36,4 +36,5 @@ uninstall:
 
 clean:
 	rm -f *.cmi *.cmxa *.cma *.cmx *.cmo *.o *.so *.a
+	rm -f libscrypt/*.o libscrypt/__.SYMDEF*
 	cd libscrypt && make clean
