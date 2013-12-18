@@ -13,9 +13,9 @@ let encrypt ?(maxmem=0) ?(maxmemfrac=0.125) ?(maxtime=5.0) data passwd=
   try Some (encrypt_exn ~maxmem ~maxmemfrac ~maxtime data passwd)
   with Scrypt_error _ -> None
 
-let decrypt_exn ?(maxmem=0) ?(maxmemfrac=0.5) ?(maxtime=300.0) data passwd =
-  scryptdec_buf data passwd maxmem maxmemfrac maxtime
+let decrypt_exn ?(maxmem=0) ?(maxmemfrac=0.5) ?(maxtime=300.0) cyphertext passwd =
+  scryptdec_buf cyphertext passwd maxmem maxmemfrac maxtime
 
-let decrypt ?(maxmem=0) ?(maxmemfrac=0.5) ?(maxtime=300.0) data passwd =
-  try Some (decrypt_exn ~maxmem ~maxmemfrac ~maxtime data passwd)
+let decrypt ?(maxmem=0) ?(maxmemfrac=0.5) ?(maxtime=300.0) cyphertext passwd =
+  try Some (decrypt_exn ~maxmem ~maxmemfrac ~maxtime cyphertext passwd)
   with Scrypt_error _ -> None

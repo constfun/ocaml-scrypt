@@ -23,11 +23,11 @@ struct ScryptArgs {
 	double  maxtime;
 };
 
-struct ScryptArgs scrypt_convert_args(value data, value passwd, value maxmem, value maxmemfrac, value maxtime) {
+struct ScryptArgs scrypt_convert_args(value input, value passwd, value maxmem, value maxmemfrac, value maxtime) {
 
 	struct ScryptArgs args = {
-		.inbuf = &Byte_u(data, 0),
-		.inbuflen = caml_string_length(data),
+		.inbuf = &Byte_u(input, 0),
+		.inbuflen = caml_string_length(input),
 		.passwd = &Byte_u(passwd, 0),
 		.passwdlen = caml_string_length(passwd),
 		.maxmem = Unsigned_long_val(maxmem),
@@ -58,7 +58,7 @@ void scrypt_raise_scrypt_error(int err_code) {
 CAMLprim value scryptenc_buf_stub(value data, value passwd, value maxmem, value maxmemfrac, value maxtime) {
 
 	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
-	CAMLlocal1(output);
+	CAMLlocal1(cyphertext);
 
 	int err = SCRYPT_MALLOC_ERROR;
 	uint8_t *outbuf = NULL;
@@ -75,32 +75,32 @@ CAMLprim value scryptenc_buf_stub(value data, value passwd, value maxmem, value 
 	 *		 size_t maxmem, double maxmemfrac, double maxtime)
 	 */
 
-	output = caml_alloc_string(args.inbuflen + 128);
+	cyphertext = caml_alloc_string(args.inbuflen + 128);
 	// Output can be written directly to our ocaml string block.
-	outbuf = &Byte_u(output, 0);
+	outbuf = &Byte_u(cyphertext, 0);
 
 	err = scryptenc_buf(args.inbuf, args.inbuflen, outbuf, args.passwd, args.passwdlen,
 		      args.maxmem, args.maxmemfrac, args.maxtime);
 	check_err(err);
 
-	CAMLreturn(output);
+	CAMLreturn(cyphertext);
 
 error:
 	scrypt_raise_scrypt_error(err);
-	CAMLreturn(output);
+	CAMLreturn(cyphertext);
 }
 
-CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value maxmemfrac, value maxtime) {
+CAMLprim value scryptdec_buf_stub(value cyphertext, value passwd, value maxmem, value maxmemfrac, value maxtime) {
 
-	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
-	CAMLlocal1(output);
+	CAMLparam5(cyphertext, passwd, maxmem, maxmemfrac, maxtime);
+	CAMLlocal1(decrypted_data);
 
 	int err = SCRYPT_MALLOC_ERROR;
-	uint8_t *output_start = NULL;
+	uint8_t *decrypted_data_start = NULL;
 	uint8_t *outbuf = NULL;
 	size_t outlen = 0;
 
-	struct ScryptArgs args = scrypt_convert_args(data, passwd, maxmem, maxmemfrac, maxtime);
+	struct ScryptArgs args = scrypt_convert_args(cyphertext, passwd, maxmem, maxmemfrac, maxtime);
 
 	/* From the horses mouth:
 	 *
@@ -113,7 +113,7 @@ CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value 
 	 *		 size_t maxmem, double maxmemfrac, double maxtime)
 	 */
 
-	// An intermediate buffer is required, since we need to allocate more than the output lenght for scrypt
+	// An intermediate buffer is required, since we need to allocate more than the decrypted_data length for scrypt
 	// and ocaml blocks cannot be resized once allocated (not easily anyway.)
 	outbuf = malloc(sizeof(uint8_t) * args.inbuflen);
 	check_mem(outbuf);
@@ -122,18 +122,18 @@ CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value 
 		      args.maxmem, args.maxmemfrac, args.maxtime);
 	check_err(err);
 
-	// Allocate the output string and copy over outlen elements from our buffer into it.
-	output = caml_alloc_string(outlen);
-	output_start = &Byte_u(output, 0);
-	memcpy(output_start, outbuf, outlen);
+	// Allocate the decrypted_data string and copy over outlen elements from our buffer into it.
+	decrypted_data = caml_alloc_string(outlen);
+	decrypted_data_start = &Byte_u(decrypted_data, 0);
+	memcpy(decrypted_data_start, outbuf, outlen);
 
 	free(outbuf);
 
-	CAMLreturn(output);
+	CAMLreturn(decrypted_data);
 
 error:
 	if(outbuf) free(outbuf);
 
 	scrypt_raise_scrypt_error(err);
-	CAMLreturn(output);
+	CAMLreturn(decrypted_data);
 }
