@@ -37,4 +37,4 @@ val decrypted_data : string = "my secret data"
 
 There are also non-exn versions of `encrypt_exn` and `decrypt_exn` that return a `string option`.
 
-### Read the full documentation: http://pacemkr.github.io/ocaml-scrypt/
+### Full documentation: http://pacemkr.github.io/ocaml-scrypt/
