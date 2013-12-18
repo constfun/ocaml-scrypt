@@ -5,7 +5,7 @@ all: $(SCRYPT_LIB)
 	# Comple just the stubs into an object file.
 	#
 	# The stubs expect to find "scrypt.h" on include path.
-	ocamlfind ocamlopt -o scrypt_stubs scrypt_stubs.c -ccopt -I$(SCRYPT_PATH)
+	ocamlfind ocamlopt -o scrypt_stubs scrypt_stubs.c -ccopt -fPIC -ccopt -I$(SCRYPT_PATH)
 
 	# Compile scrypt.mli (the interface) to a cmi (compiled module interface).
 	# Compile scrypt.ml to bytecode (cmo).
