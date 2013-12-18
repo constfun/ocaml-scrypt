@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="Up" href="index.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Scrypt" rel="Chapter" href="Scrypt.html"><link title="Meaning of maxmem, maxmemfrac, and maxtime" rel="Section" href="#scrypt_params">
+<title>Scrypt</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Scrypt.html">Scrypt</a></h1>
+
+<pre><span class="keyword">module</span> Scrypt: <code class="code">sig</code> <a href="Scrypt.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Strong, password based encryption.
+<p>
+
+    No wheels invented. This module is a high level interface to the <a href=" https://www.tarsnap.com/scrypt.html "> official scrypt distribution</a>.
+<p>
+
+    Scrypt is designed to make it costly to perform large scale custom hardware attacks by requiring large amounts of memory. <a href=" htps://en.wikipedia.org/wiki/Scrypt "> (Wikipedia) </a><br>
+</div>
+<hr width="100%">
+
+<pre><span id="EXCEPTIONScrypt_error"><span class="keyword">exception</span> Scrypt_error</span> <span class="keyword">of</span> <code class="type">int</code></pre>
+<div class="info ">
+<code class="code">Scrypt_error code</code> indicates an error during a call to the underlying C implementation of scrypt.
+<p>
+
+    <code class="code">code</code> is the exact return code reported by the underlying implementation and is defined as one of the following:<ul>
+<li><code class="code">0</code> success</li>
+<li><code class="code">1</code> getrlimit or sysctl(hw.usermem) failed</li>
+<li><code class="code">2</code> clock_getres or clock_gettime failed</li>
+<li><code class="code">3</code> error computing derived key</li>
+<li><code class="code">4</code> could not read salt from /dev/urandom</li>
+<li><code class="code">5</code> error in OpenSSL</li>
+<li><code class="code">6</code> malloc failed</li>
+<li><code class="code">7</code> data is not a valid scrypt-encrypted block</li>
+<li><code class="code">8</code> unrecognized scrypt format</li>
+<li><code class="code">9</code> decrypting file would take too much memory</li>
+<li><code class="code">10</code> decrypting file would take too long</li>
+<li><code class="code">11</code> password is incorrect</li>
+<li><code class="code">12</code> error writing output file</li>
+<li><code class="code">13</code> error reading input file</li>
+</ul>
+<br>
+</div>
+
+<pre><span id="VALencrypt"><span class="keyword">val</span> encrypt</span> : <code class="type">?maxmem:int -><br>       ?maxmemfrac:float -> ?maxtime:float -> string -> string -> string option</code></pre><div class="info ">
+<code class="code">encrypt data passwd</code> encrypts <code class="code">data</code> using <code class="code">passwd</code> and returns <code class="code">Some string</code> of the cyphertext or <code class="code">None</code> if there was an error.
+<p>
+
+    The default values of <code class="code">maxmem=0</code>, <code class="code">maxmemfrac=0.125</code>, and <code class="code">maxtime=5.0</code> are chosen to match the the reference scrypt implementation.
+<p>
+
+    See <a href="Scrypt.html#scrypt_params"><i>Meaning of maxmem, maxmemfrac, and maxtime</i></a>.<br>
+</div>
+
+<pre><span id="VALencrypt_exn"><span class="keyword">val</span> encrypt_exn</span> : <code class="type">?maxmem:int -><br>       ?maxmemfrac:float -> ?maxtime:float -> string -> string -> string</code></pre><div class="info ">
+Same as <a href="Scrypt.html#VALencrypt"><code class="code">Scrypt.encrypt</code></a> except raise <a href="Scrypt.html#EXCEPTIONScrypt_error"><code class="code">Scrypt.Scrypt_error</code></a> in case of an error.<br>
+</div>
+
+<pre><span id="VALdecrypt"><span class="keyword">val</span> decrypt</span> : <code class="type">?maxmem:int -><br>       ?maxmemfrac:float -> ?maxtime:float -> string -> string -> string option</code></pre><div class="info ">
+<code class="code">decrypt cyphertext passwd</code> decrypts <code class="code">cyphertext</code> using <code class="code">passwd</code> and returns <code class="code">Some string</code> of the decrypted data or <code class="code">None</code> if there was an error.
+<p>
+
+    The default values of <code class="code">maxmem=0</code>, <code class="code">maxmemfrac=0.5</code>, and <code class="code">maxtime=300.0</code> are chosen to match the the reference scrypt implementation.
+<p>
+
+    See <a href="Scrypt.html#scrypt_params"><i>Meaning of maxmem, maxmemfrac, and maxtime</i></a>.<br>
+</div>
+
+<pre><span id="VALdecrypt_exn"><span class="keyword">val</span> decrypt_exn</span> : <code class="type">?maxmem:int -><br>       ?maxmemfrac:float -> ?maxtime:float -> string -> string -> string</code></pre><div class="info ">
+Same as <a href="Scrypt.html#VALdecrypt"><code class="code">Scrypt.decrypt</code></a> except raise <a href="Scrypt.html#EXCEPTIONScrypt_error"><code class="code">Scrypt.Scrypt_error</code></a> in case of an error.<br>
+</div>
+<br>
+<h1 id="scrypt_params">Meaning of <code class="code">maxmem</code>, <code class="code">maxmemfrac</code>, and <code class="code">maxtime</code></h1>
+<p>
+
+    <ul>
+<li><code class="code">maxmem</code> is the maximum number of bytes of storage to use for V array (which is by far the largest consumer of memory).
+<p>
+
+            If <code class="code">maxmem</code> is set to <code class="code">0</code>, no maximum will be enforced; any other value less than 1 MiB will be treated as 1 MiB.
+        </li>
+<li><code class="code">maxmemfrac</code> is the maximum fraction of available storage to use for the V array, where "available storage" is defined as the minimum out of the <a href=" http://man7.org/linux/man-pages/man2/getrlimit.2.html "> RLIMIT_AS, RLIMIT_DATA and RLIMIT_RSS</a> resource limits (if any are set).
+<p>
+
+            If <code class="code">maxmemfrac</code> is set to <code class="code">0</code> or more than <code class="code">0.5</code> it will be treated as <code class="code">0.5</code>; and this value will never cause a limit of less than 1 MiB to be enforced.
+        </li>
+<li><code class="code">maxtime</code> is the maximum amount of CPU time to spend computing the derived keys, in seconds.
+<p>
+
+            This limit is only approximately enforced; the CPU performance is estimated and parameter limits are chosen accordingly.
+        </li>
+</ul>
+<br>
+</body></html>
