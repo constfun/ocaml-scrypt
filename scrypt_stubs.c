@@ -8,6 +8,8 @@
 #include <caml/fail.h>
 #include "scrypt.h"
 
+#define SCRYPT_MALLOC_ERROR 6
+
 #define check_mem(A) if(!A) { goto error; }
 #define check_err(A) if(A) { goto error; }
 
@@ -58,7 +60,7 @@ CAMLprim value scryptenc_buf_stub(value data, value passwd, value maxmem, value 
 	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
 	CAMLlocal1(output);
 
-	int err = 0;
+	int err = SCRYPT_MALLOC_ERROR;
 	uint8_t *outbuf = NULL;
 
 	struct ScryptArgs args = scrypt_convert_args(data, passwd, maxmem, maxmemfrac, maxtime);
@@ -93,7 +95,7 @@ CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value 
 	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
 	CAMLlocal1(output);
 
-	int err = 0;
+	int err = SCRYPT_MALLOC_ERROR;
 	uint8_t *output_start = NULL;
 	uint8_t *outbuf = NULL;
 	size_t outlen = 0;
