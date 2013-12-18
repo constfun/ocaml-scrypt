@@ -1,3 +1,6 @@
+exception Scrypt_error of int
+let _ = Callback.register_exception "Scrypt_error" (Scrypt_error 0)
+
 external scryptenc_buf : string -> string -> int -> float -> float -> string = "scryptenc_buf_stub"
 external scryptdec_buf : string -> string -> int -> float -> float -> string = "scryptdec_buf_stub"
 

@@ -4,9 +4,12 @@
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
 #include <caml/alloc.h>
+#include <caml/callback.h>
+#include <caml/fail.h>
 #include "scrypt.h"
 
 #define check_mem(A) if(!A) { goto error; }
+#define check_err(A) if(A) { goto error; }
 
 struct ScryptArgs {
 	uint8_t *inbuf;
@@ -33,13 +36,30 @@ struct ScryptArgs scrypt_convert_args(value data, value passwd, value maxmem, va
 	return args;
 }
 
+void scrypt_raise_scrypt_error(int err_code) {
+
+	CAMLparam0();
+	CAMLlocal1(code_val);
+
+	static value *exn = NULL;
+	if( !exn ) {
+
+		exn = caml_named_value("Scrypt_error");
+	}
+
+	code_val = Val_int(err_code);
+	caml_raise_with_arg(*exn, code_val);
+
+	CAMLreturn0;
+}
+
 CAMLprim value scryptenc_buf_stub(value data, value passwd, value maxmem, value maxmemfrac, value maxtime) {
 
 	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
 	CAMLlocal1(output);
 
+	int err = 0;
 	uint8_t *outbuf = NULL;
-
 
 	struct ScryptArgs args = scrypt_convert_args(data, passwd, maxmem, maxmemfrac, maxtime);
 
@@ -57,9 +77,14 @@ CAMLprim value scryptenc_buf_stub(value data, value passwd, value maxmem, value 
 	// Output can be written directly to our ocaml string block.
 	outbuf = &Byte_u(output, 0);
 
-	scryptenc_buf(args.inbuf, args.inbuflen, outbuf, args.passwd, args.passwdlen,
+	err = scryptenc_buf(args.inbuf, args.inbuflen, outbuf, args.passwd, args.passwdlen,
 		      args.maxmem, args.maxmemfrac, args.maxtime);
+	check_err(err);
 
+	CAMLreturn(output);
+
+error:
+	scrypt_raise_scrypt_error(err);
 	CAMLreturn(output);
 }
 
@@ -68,6 +93,7 @@ CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value 
 	CAMLparam5(data, passwd, maxmem, maxmemfrac, maxtime);
 	CAMLlocal1(output);
 
+	int err = 0;
 	uint8_t *output_start = NULL;
 	uint8_t *outbuf = NULL;
 	size_t outlen = 0;
@@ -90,8 +116,9 @@ CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value 
 	outbuf = malloc(sizeof(uint8_t) * args.inbuflen);
 	check_mem(outbuf);
 
-	scryptdec_buf(args.inbuf, args.inbuflen, outbuf, &outlen, args.passwd, args.passwdlen,
+	err = scryptdec_buf(args.inbuf, args.inbuflen, outbuf, &outlen, args.passwd, args.passwdlen,
 		      args.maxmem, args.maxmemfrac, args.maxtime);
+	check_err(err);
 
 	// Allocate the output string and copy over outlen elements from our buffer into it.
 	output = caml_alloc_string(outlen);
@@ -105,5 +132,6 @@ CAMLprim value scryptdec_buf_stub(value data, value passwd, value maxmem, value 
 error:
 	if(outbuf) free(outbuf);
 
+	scrypt_raise_scrypt_error(err);
 	CAMLreturn(output);
 }
