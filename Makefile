@@ -60,6 +60,11 @@ install:
 uninstall:
 	ocamlfind remove scrypt
 
+docs:
+	rm -rf docs
+	mkdir docs
+	ocamlfind ocamldoc -html -d docs scrypt.mli
+
 clean:
 	rm -f *.cmi *.cmxa *.cma *.cmx *.cmo *.o *.so *.a
 	rm -f libscrypt/*.o libscrypt/__.SYMDEF*
