@@ -45,8 +45,8 @@ all: $(SCRYPT_LIB)
 	#			are memoized in scrypt.cmxa and are automatically applied whenever a client links to the library.
 	#		scrypt.cmx is NOT installed since it is fully contained in scrypt.cmxa.
 	#
-	#	-lcrypto is OpenSSL (scrypt dependency) and must be present on on the system.
-	ocamlfind ocamlmklib -v -o scrypt scrypt.cmo scrypt.cmx scrypt_stubs.o $(SCRYPT_PATH)/*.o -cclib -lscrypt -cclib -lcrypto
+	#	-lcrypto is OpenSSL (scrypt dependency) and must be present on on the system, it will also link the resulting dllscrypt.so with libcrypto.so.
+	ocamlfind ocamlmklib -v -o scrypt scrypt.cmo scrypt.cmx scrypt_stubs.o $(SCRYPT_PATH)/*.o -lcrypto -cclib -lscrypt -cclib -lcrypto
 
 $(SCRYPT_LIB):
 	# Compile scrypt, but immediately explode the library into it's object files.
