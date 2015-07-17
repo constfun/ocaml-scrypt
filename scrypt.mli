@@ -47,6 +47,21 @@ val decrypt : ?maxmem:int -> ?maxmemfrac:float -> ?maxtime:float -> string -> st
 (** Same as {!decrypt} except raise {!Scrypt_error} in case of an error. *)
 val decrypt_exn : ?maxmem:int -> ?maxmemfrac:float -> ?maxtime:float -> string -> string -> string
 
+(** [hash passwd] hashes [passwd] and returns a derived key [Some string] or [None] if there was an error.
+
+    Optional parameters:
+    {ul
+      {li [logN] Base-2 logarithm of the general work factor. Defaults to 14, which is fine for interactive use. Increase [logN] for sensitive or offline storage. However, N is an int64, so inputs >= 64  or < 0 are unspecified. }
+      {li [r] Blocksize of the underlying hash. Fine-tunes the relative memory cost. Defaults to [8]. }
+      {li [p] Parallelization factor. Fine-tunes the relative CPU cost. Defaults to [1]. }
+    }
+    The parameters [r] and [p] must satisfy [r * p < 2^30].
+*)
+val hash : ?logN:int -> ?r:int -> ?p:int -> string -> string option
+
+(** Same as {!hash} except raise {!Scrypt_error} in case of an error. *)
+val hash_exn : ?logN:int -> ?r:int -> ?p:int -> string -> string
+
 (** {1:scrypt_params Meaning of [maxmem], [maxmemfrac], and [maxtime]}
 
     {ul
