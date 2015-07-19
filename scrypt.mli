@@ -62,6 +62,10 @@ val hash : ?logN:int -> ?r:int -> ?p:int -> string -> string option
 (** Same as {!hash} except raise {!Scrypt_error} in case of an error. *)
 val hash_exn : ?logN:int -> ?r:int -> ?p:int -> string -> string
 
+(** [verify passwd scrypt_str] compares the plaintext password [passwd] against a derived key [scrypt_str] such as the one returned by {!hash}. Returns true if the comparison succeeds, false otherwise.
+*)
+val verify : string -> string -> bool
+
 (** {1:scrypt_params Meaning of [maxmem], [maxmemfrac], and [maxtime]}
 
     {ul
