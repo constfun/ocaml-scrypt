@@ -25,6 +25,7 @@ let decrypt ?(maxmem=0) ?(maxmemfrac=0.5) ?(maxtime=300.0) cyphertext passwd =
 (* one day re-implement these to avoid int32 boxing; it is unnecessary here *)
 (* given that the values we're setting/getting fit within a tagged int *)
 external w32 : Bytes.t -> int -> int32 -> unit = "%caml_string_set32"
+external r32 : Bytes.t -> int -> int32 = "%caml_string_get32"
 external swap32 : int32 -> int32 = "%bswap_int32"
 
 external sha256 : Bytes.t -> String.t = "scrypt_sha256"
@@ -34,6 +35,11 @@ let be32enc s off v =
   if Sys.big_endian
   then w32 s off v
   else w32 s off (swap32 v)
+
+let be32dec s off =
+  if Sys.big_endian
+  then r32 s off
+  else swap32 (r32 s off)
 
 let hash_exn ?(logN=14) ?(r=8) ?(p=1) passwd =
   (* Prepare inputs to KDF *)
@@ -70,3 +76,38 @@ let hash_exn ?(logN=14) ?(r=8) ?(p=1) passwd =
 let hash ?logN ?r ?p passwd =
   try Some (hash_exn ?logN ?r ?p passwd)
   with Scrypt_error _ -> None
+
+let verify passwd scrypt_str = try
+
+  (* Check header format. *)
+  if String.length scrypt_str < 96 then raise (Scrypt_error 7);
+  begin match String.sub scrypt_str 0 7 with
+  | "scrypt\000" -> ()
+  | _ -> raise (Scrypt_error 8) (* unrecognized scrypt format *)
+  end;
+
+  (* Parse N, r, p, salt. *)
+  let logN = Char.code (String.get scrypt_str 7) in
+  let r = Int32.to_int (be32dec scrypt_str 8) in
+  let p = Int32.to_int (be32dec scrypt_str 12) in
+  let salt = String.sub scrypt_str 16 32 in
+
+  (* Verify header checksum. *)
+  let checksum = String.sub (sha256 (String.sub scrypt_str 0 48)) 0 16 in
+  if 0 <> String.compare checksum (String.sub scrypt_str 48 16)
+  then raise (Scrypt_error 7);
+
+  (* Compute the derived keys. *)
+  let n = Int64.shift_left 1L logN in
+  let dk = Bytes.create 64 in
+  crypto_scrypt passwd salt n r p dk;
+
+  (* Check header signature (eg, verify password). *)
+  let signature = hmac_sha256 (String.sub scrypt_str 0 64) (Bytes.sub dk 32 32) in
+  if 0 <> String.compare signature (String.sub scrypt_str 64 32)
+  then raise (Scrypt_error 7);
+
+  (* Success! *)
+  true
+
+with Scrypt_error _ -> false
