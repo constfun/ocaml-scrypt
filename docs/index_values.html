@@ -35,6 +35,23 @@ Same as <a href="Scrypt.html#VALdecrypt"><code class="code">Scrypt.decrypt</code
 Same as <a href="Scrypt.html#VALencrypt"><code class="code">Scrypt.encrypt</code></a> except raise <a href="Scrypt.html#EXCEPTIONScrypt_error"><code class="code">Scrypt.Scrypt_error</code></a> in case of an error.
 </div>
 </td></tr>
+<tr><td align="left"><br>H</td></tr>
+<tr><td><a href="Scrypt.html#VALhash">hash</a> [<a href="Scrypt.html">Scrypt</a>]</td>
+<td><div class="info">
+<code class="code">hash passwd</code> hashes <code class="code">passwd</code> and returns a derived key <code class="code">Some string</code> or <code class="code">None</code> if there was an error.
+</div>
+</td></tr>
+<tr><td><a href="Scrypt.html#VALhash_exn">hash_exn</a> [<a href="Scrypt.html">Scrypt</a>]</td>
+<td><div class="info">
+Same as <a href="Scrypt.html#VALhash"><code class="code">Scrypt.hash</code></a> except raise <a href="Scrypt.html#EXCEPTIONScrypt_error"><code class="code">Scrypt.Scrypt_error</code></a> in case of an error.
+</div>
+</td></tr>
+<tr><td align="left"><br>V</td></tr>
+<tr><td><a href="Scrypt.html#VALverify">verify</a> [<a href="Scrypt.html">Scrypt</a>]</td>
+<td><div class="info">
+<code class="code">verify passwd scrypt_str</code> compares the password <code class="code">passwd</code> against a string <code class="code">scrypt_str</code> that is encoded with the scrypt parameters, such as the one returned by <a href="Scrypt.html#VALhash"><code class="code">Scrypt.hash</code></a>.
+</div>
+</td></tr>
 </table>
 </body>
 </html>

@@ -78,6 +78,28 @@ Same as <a href="Scrypt.html#VALencrypt"><code class="code">Scrypt.encrypt</code
 <pre><span id="VALdecrypt_exn"><span class="keyword">val</span> decrypt_exn</span> : <code class="type">?maxmem:int -><br>       ?maxmemfrac:float -> ?maxtime:float -> string -> string -> string</code></pre><div class="info ">
 Same as <a href="Scrypt.html#VALdecrypt"><code class="code">Scrypt.decrypt</code></a> except raise <a href="Scrypt.html#EXCEPTIONScrypt_error"><code class="code">Scrypt.Scrypt_error</code></a> in case of an error.<br>
 </div>
+
+<pre><span id="VALhash"><span class="keyword">val</span> hash</span> : <code class="type">?logN:int -> ?r:int -> ?p:int -> string -> string option</code></pre><div class="info ">
+<code class="code">hash passwd</code> hashes <code class="code">passwd</code> and returns a derived key <code class="code">Some string</code> or <code class="code">None</code> if there was an error.
+<p>
+
+    Optional parameters:
+    <ul>
+<li><code class="code">logN</code> Base-2 logarithm of the general work factor. Defaults to 14, which is fine for interactive use. Increase <code class="code">logN</code> for sensitive or offline storage. However, N is an int64, so inputs &gt;= 64  or &lt; 0 are unspecified. </li>
+<li><code class="code">r</code> Blocksize of the underlying hash. Fine-tunes the relative memory cost. Defaults to <code class="code">8</code>. </li>
+<li><code class="code">p</code> Parallelization factor. Fine-tunes the relative CPU cost. Defaults to <code class="code">1</code>. </li>
+</ul>
+
+    The parameters <code class="code">r</code> and <code class="code">p</code> must satisfy <code class="code">r * p &lt; 2^30</code>.<br>
+</div>
+
+<pre><span id="VALhash_exn"><span class="keyword">val</span> hash_exn</span> : <code class="type">?logN:int -> ?r:int -> ?p:int -> string -> string</code></pre><div class="info ">
+Same as <a href="Scrypt.html#VALhash"><code class="code">Scrypt.hash</code></a> except raise <a href="Scrypt.html#EXCEPTIONScrypt_error"><code class="code">Scrypt.Scrypt_error</code></a> in case of an error.<br>
+</div>
+
+<pre><span id="VALverify"><span class="keyword">val</span> verify</span> : <code class="type">string -> string -> bool</code></pre><div class="info ">
+<code class="code">verify passwd scrypt_str</code> compares the password <code class="code">passwd</code> against a string <code class="code">scrypt_str</code> that is encoded with the scrypt parameters, such as the one returned by <a href="Scrypt.html#VALhash"><code class="code">Scrypt.hash</code></a>. Returns true if the comparison succeeds, false otherwise.<br>
+</div>
 <br>
 <h1 id="scrypt_params">Meaning of <code class="code">maxmem</code>, <code class="code">maxmemfrac</code>, and <code class="code">maxtime</code></h1>
 <p>
