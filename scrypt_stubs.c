@@ -9,7 +9,7 @@
 #include "scrypt.h"
 
 // for hashing
-#include "scrypt-1.1.6/lib/crypto/crypto_scrypt.h"
+#include "scrypt-1.2.0/lib/crypto/crypto_scrypt.h"
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
 
