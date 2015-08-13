@@ -45,3 +45,5 @@ noinst_LIBRARIES+=	libscrypt_sse2.a
 libscrypt_sse2_a_SOURCES=	lib/crypto/crypto_scrypt_smix_sse2.c
 libscrypt_sse2_a_CFLAGS=	$(scrypt_CFLAGS)	\
 			`. ./cpusupport-config.h; echo $${CFLAGS_X86_SSE2}`
+
+print-% : ; @echo $($*)
