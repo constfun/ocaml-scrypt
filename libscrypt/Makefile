@@ -20,6 +20,7 @@ LDOBJS=$(shell $(SMAKE) $(LDADD:%.a=print-%_a_OBJECTS))
 
 all: libscrypt.a libscrypt.so
 	cp $(SCRYPT)/lib/scryptenc/scryptenc.h scrypt.h
+	cp $(SCRYPT)/lib/crypto/crypto_scrypt.h crypto_scrypt.h
 
 $(CONFIG_H):
 	cd $(SCRYPT) && ./configure
@@ -41,5 +42,5 @@ libscrypt.so: scrypt
 	$(CC) $(CFLAGS) $(LIBS) -shared -o $@ $(OBJSp) $(LDOBJSp)
 
 clean:
-	rm -f libscrypt.a libscrypt.so scrypt.h
+	rm -f libscrypt.a libscrypt.so scrypt.h crypto_scrypt.h
 	$(SMAKE) distclean
