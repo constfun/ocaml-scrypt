@@ -22,4 +22,7 @@
 &nbsp;&nbsp;<span class="keyword">val</span>&nbsp;decrypt_exn&nbsp;:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;?maxmem:int&nbsp;<span class="keywordsign">-&gt;</span><br>
 &nbsp;&nbsp;&nbsp;&nbsp;?maxmemfrac:float&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?maxtime:float&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;hash&nbsp;:&nbsp;?logN:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?r:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?p:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;hash_exn&nbsp;:&nbsp;?logN:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?r:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;?p:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;verify&nbsp;:&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
 <span class="keyword">end</span></code></body></html>

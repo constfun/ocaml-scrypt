@@ -8,6 +8,11 @@
 #include <caml/fail.h>
 #include "scrypt.h"
 
+// for hashing
+#include "crypto_scrypt.h"
+#include <openssl/sha.h>
+#include <openssl/hmac.h>
+
 #define SCRYPT_MALLOC_ERROR 6
 
 #define check_mem(A) if(!A) { goto error; }
@@ -136,4 +141,80 @@ error:
 
 	scrypt_raise_scrypt_error(err);
 	CAMLreturn(decrypted_data);
+}
+
+CAMLprim value crypto_scrypt_native(value passwd, value salt, value N, value r, value p, value buf) {
+    CAMLparam5(passwd, salt, N, r, p);
+    CAMLxparam1(buf);
+    const uint8_t* pwd_p = &Byte_u(passwd, 0);
+    const uint8_t* slt_p = &Byte_u(salt, 0);
+    uint8_t* buf_p = &Byte_u(buf, 0);
+
+    int pwdlen = caml_string_length(passwd);
+    int sltlen = caml_string_length(salt);
+    int buflen = caml_string_length(buf);
+
+    int64 N_p = Int64_val(N);
+    int r_p = Val_int(r);
+    int p_p = Val_int(p);
+
+    int err = crypto_scrypt(pwd_p, pwdlen, slt_p, sltlen, N_p, r_p, p_p, buf_p, buflen);
+    check_err(err);
+
+    CAMLreturn(Val_unit);
+
+error:
+    scrypt_raise_scrypt_error(err);
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim value crypto_scrypt_bytecode(value *argv, int argc)
+{
+    return crypto_scrypt_native(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+}
+
+CAMLprim value scrypt_sha256(value str)
+{
+    CAMLparam1(str);
+    CAMLlocal1(digest);
+
+    uint8_t *sbuf, *dbuf;
+    int slen;
+    SHA256_CTX ctx;
+
+    digest = caml_alloc_string(32);
+    slen = caml_string_length(str);
+    sbuf = &Byte_u(str, 0);
+    dbuf = &Byte_u(digest, 0);
+
+    /* Add header checksum. */
+    SHA256_Init(&ctx);
+    SHA256_Update(&ctx, sbuf, slen);
+    SHA256_Final(dbuf, &ctx);
+
+    CAMLreturn(digest);
+}
+
+CAMLprim value scrypt_hmac_sha256(value data, value key)
+{
+    CAMLparam2(data, key);
+    CAMLlocal1(hmac);
+
+    uint8_t *dbuf, *kbuf, *hbuf;
+    int datalen, keylen;
+    HMAC_CTX ctx;
+
+    hmac = caml_alloc_string(32);
+    datalen = caml_string_length(data);
+    keylen = caml_string_length(key);
+    kbuf = &Byte_u(key, 0);
+    hbuf = &Byte_u(hmac, 0);
+    dbuf = &Byte_u(data, 0);
+
+    /* Add header signature. (used for verifying password). */
+    HMAC_Init(&ctx, kbuf, keylen, EVP_sha256());
+    HMAC_Update(&ctx, dbuf, datalen);
+    HMAC_Final(&ctx, hbuf, NULL);
+
+    CAMLreturn(hmac);
 }

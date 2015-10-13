@@ -1,37 +1,46 @@
-SCRYPT = scrypt-1.1.6
+SCRYPT = scrypt-1.2.0
 
 CONFIG_H = $(SCRYPT)/config.h
 
-CFLAGS=-g -O2 -fPIC -lcrypto -DHAVE_CONFIG_H \
-       -I$(SCRYPT) \
-       -I$(SCRYPT)/lib/crypto \
-       -I$(SCRYPT)/lib/scryptenc \
-       -I$(SCRYPT)/lib/util
+CFLAGS=-g -O2 -fPIC -DHAVE_CONFIG_H
 
-SOURCES=$(SCRYPT)/lib/crypto/crypto_aesctr.c \
-	$(SCRYPT)/lib/crypto/crypto_scrypt-nosse.c \
-	$(SCRYPT)/lib/scryptenc/scryptenc.c \
-	$(SCRYPT)/lib/scryptenc/scryptenc_cpuperf.c \
-	$(SCRYPT)/lib/util/memlimit.c \
-	$(SCRYPT)/lib/crypto/sha256.c \
-	$(SCRYPT)/lib/util/warn.c
+# Execute Make in the scrypt directory
+SMAKE=$(MAKE) --no-print-directory -C $(SCRYPT)
 
-OBJECTS=$(patsubst %.c,%.o,$(SOURCES))
+# we don't want main, so remove it from objs
+OBJS=$(filter-out scrypt-main.%, $(shell $(SMAKE) print-scrypt_OBJECTS))
+DEPS=$(shell $(SMAKE) print-scrypt_DEPENDENCIES print-EXTRA_scrypt_DEPENDENCIES)
+LIBS=$(shell $(SMAKE) print-LIBS) -lcrypto
+AR=$(shell $(SMAKE) print-AR print-ARFLAGS)
+
+LDADD=$(shell $(SMAKE) print-noinst_LIBRARIES) # aesni, sse2 (if applicable)
+# extract the object files for any additional (static) libraries.
+# Rather than futzing around with PIC, just get object list from the scrypt Makefile
+LDOBJS=$(shell $(SMAKE) $(LDADD:%.a=print-%_a_OBJECTS))
 
 all: libscrypt.a libscrypt.so
 	cp $(SCRYPT)/lib/scryptenc/scryptenc.h scrypt.h
+	cp $(SCRYPT)/lib/crypto/crypto_scrypt.h crypto_scrypt.h
 
 $(CONFIG_H):
 	cd $(SCRYPT) && ./configure
 
-libscrypt.a: $(CONFIG_H) $(OBJECTS)
-	ar rcs $@ $(OBJECTS)
+scrypt: $(CONFIG_H)
+	$(SMAKE) cpusupport-config.h config.h
+	$(SMAKE) $(LDADD) $(OBJS) $(DEPS)
+
+# add scrypt directory prefix for object files
+OBJSp=$(OBJS:%=$(SCRYPT)/%)
+LDOBJSp=$(LDOBJS:%=$(SCRYPT)/%)
+
+libscrypt.a: scrypt
+	$(AR) $@ $(OBJSp) $(LDOBJSp)
 	ranlib $@
 
-libscrypt.so: $(CONFIG_H) $(OBJECTS)
-	$(CC) $(CFLAGS) -shared -o $@ $(OBJECTS)
+# XXX make shared libs portable to OSX and Windows
+libscrypt.so: scrypt
+	$(CC) $(CFLAGS) $(LIBS) -shared -o $@ $(OBJSp) $(LDOBJSp)
 
 clean:
-	cd $(SCRYPT) && make clean && rm -rf .deps Makefile config.h config.log config.status stamp-h1
-	rm -f libscrypt.a libscrypt.so scrypt.h
-	rm -rf $(OBJECTS)
+	rm -f libscrypt.a libscrypt.so scrypt.h crypto_scrypt.h
+	$(SMAKE) distclean
