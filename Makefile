@@ -52,7 +52,7 @@ $(SCRYPT_LIB):
 	# Compile scrypt, but immediately explode the library into it's object files.
 	# We do this to merge the objects with scrypt_stubs.o into a new, unified, library under the name libscrypt.a
 	# The merging step happens during ocamlmklib linking.
-	cd libscrypt && make && ar x libscrypt.a
+	cd libscrypt && $(MAKE) && ar -x libscrypt.a
 
 install:
 	ocamlfind install scrypt META *.cmi *.cmxa *.cma *.a *.so
@@ -68,4 +68,4 @@ docs:
 clean:
 	rm -f *.cmi *.cmxa *.cma *.cmx *.cmo *.o *.so *.a
 	rm -f libscrypt/*.o libscrypt/__.SYMDEF*
-	cd libscrypt && make clean
+	cd libscrypt && $(MAKE) clean

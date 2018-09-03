@@ -25,13 +25,13 @@ $(CONFIG_H):
 	cd $(SCRYPT) && ./configure
 
 libscrypt.a: $(CONFIG_H) $(OBJECTS)
-	ar rcs $@ $(OBJECTS)
+	ar -rcs $@ $(OBJECTS)
 	ranlib $@
 
 libscrypt.so: $(CONFIG_H) $(OBJECTS)
 	$(CC) $(CFLAGS) -shared -o $@ $(OBJECTS)
 
 clean:
-	cd $(SCRYPT) && make clean && rm -rf .deps Makefile config.h config.log config.status stamp-h1
+	cd $(SCRYPT) && $(MAKE) clean && rm -rf .deps Makefile config.h config.log config.status stamp-h1
 	rm -f libscrypt.a libscrypt.so scrypt.h
 	rm -rf $(OBJECTS)
